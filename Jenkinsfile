@@ -27,7 +27,12 @@ pipeline {
         }
         stage('Scan with Trivy') {
             steps {
-                bat 'docker run --rm aquasec/trivy image --no-progress --scanners vuln %DOCKER_IMAGE%'
+                script{
+                    def scanResult = bat(returnStatus: true, script: 'docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --no-progress --scanners vuln --exit-code 1 --severity LOW,MEDIUM,HIGH,CRITICAL %DOCKER_IMAGE%')
+                    if (scanResult != 0) {
+                        error "Security scan failed: Vulnerabilities were detected in the image %DOCKER_IMAGE%. Please review the Trivy report for details."
+                    }
+                }    
             }
         }
         stage('Login to Docker Hub') {
