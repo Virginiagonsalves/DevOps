@@ -28,7 +28,6 @@ pipeline {
         stage('Scan with Trivy') {
             steps {
                 bat 'docker run --rm aquasec/trivy image --no-progress --scanners vuln %DOCKER_IMAGE%'
-                }    
             }
         }
         stage('Login to Docker Hub') {
